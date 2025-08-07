@@ -1,3 +1,4 @@
+<?php
 // **Avisos Rotativos Topo**
 // Snippet para Code Snippets
 // Shortcode: [avisos_rotativos_topo]
@@ -23,7 +24,7 @@ function rotativo_add_admin_menu() {
  */
 function rotativo_options_page() {
     if ( isset($_POST['rotativo_submit']) && check_admin_referer('rotativo_save_settings','rotativo_nonce') ) {
-        $effects = ['fade','slide','zoom','flip','flipVertical','typewriter','newsTicker'];
+        $effects = ['fade','slide','zoom','typewriter','newsTicker'];
         $settings = [
             'quantity'    => intval($_POST['quantity']),
             'text_color'  => sanitize_text_field($_POST['text_color']),
@@ -74,7 +75,7 @@ function rotativo_options_page() {
           <tr><th>Duração (ms)</th><td><input type="number" name="duration" value="<?php echo esc_attr($dur); ?>" min="100" /></td></tr>
           <tr><th>Gap (ms)</th><td><input type="number" name="gap" value="<?php echo esc_attr($gap); ?>" min="0" /></td></tr>
           <tr><th>Efeito</th><td><select name="effect">
-            <?php foreach(['fade'=>'Fade','slide'=>'Slide','zoom'=>'Zoom','flip'=>'Flip H','flipVertical'=>'Flip V','typewriter'=>'Typewriter','newsTicker'=>'News Ticker Vertical'] as $k => $label) { ?>
+            <?php foreach(['fade'=>'Fade','slide'=>'Slide','zoom'=>'Zoom','typewriter'=>'Typewriter','newsTicker'=>'News Ticker Vertical'] as $k => $label) { ?>
               <option value="<?php echo $k; ?>" <?php selected($eff, $k); ?>><?php echo $label; ?></option>
             <?php } ?>
           </select></td></tr>
@@ -129,15 +130,14 @@ function rotativo_frontend(){
 
     ob_start();
     echo '<div id="rotativo_container" style="background:'.$bg.';overflow:hidden;padding:5px;">';
-    foreach ($msgs as $i => $m) {
+    foreach ($msgs as $m) {
         $text = esc_html($m['text']);
         $link = esc_url($m['link']);
         if (! preg_match('#^(https?://|/)#i', $link)) {
             $link = home_url('/'.ltrim($link, '/'));
         }
-        $disp = $i === 0 ? 'block' : 'none';
-        echo '<div class="rotativo_msg" data-full-text="'.esc_attr($text).'" ' 
-           .'style="display:'.$disp.';color:'.$tc.';font-size:'.$fs.'px;'
+        echo '<div class="rotativo_msg" data-full-text="'.esc_attr($text).'" '
+           .'style="display:none;color:'.$tc.';font-size:'.$fs.'px;'
            .'font-weight:'.$fw.';font-style:'.$fst.';padding:5px 0;">'
            .'<a href="'.$link.'" style="color:'.$tc.';text-decoration:none;">'.$text.'</a></div>';
     }
@@ -151,6 +151,39 @@ function rotativo_frontend(){
             dur  = <?php echo $dur; ?>,
             gap  = <?php echo $gap; ?>,
             eff  = '<?php echo $eff; ?>';
+
+        // show first message with effect
+        var first = msgs.eq(0);
+        switch (eff) {
+            case 'slide':
+                first.hide().slideDown(dur);
+                break;
+            case 'zoom':
+                first.css({opacity:0,transform:'scale(0.5)',transition:'none'})
+                     .show()
+                     .css({transition:'all '+dur+'ms'})
+                     .css({opacity:1,transform:'scale(1)'});
+                break;
+            case 'typewriter':
+                first.show();
+                var linkTxt = first.find('a'),
+                    full = first.data('full-text'),
+                    len  = full.length,
+                    iv   = Math.max(20, dur/len);
+                linkTxt.text('');
+                for (let i = 1; i <= len; i++) {
+                    (function(i){ setTimeout(function(){ linkTxt.text(full.substr(0,i)); }, i*iv); })(i);
+                }
+                break;
+            case 'newsTicker':
+                msgs.show();
+                var wrap = $('#rotativo_container'), h = first.outerHeight();
+                wrap.scrollTop(h);
+                wrap.animate({scrollTop:0}, dur);
+                break;
+            default: // fade
+                first.hide().fadeIn(dur);
+        }
 
         function nextMsg() {
             var nxt   = (curr + 1) % ttl,
@@ -171,34 +204,6 @@ function rotativo_frontend(){
                                 .css({transition:'all '+dur+'ms'})
                                 .css({opacity:1,transform:'scale(1)'});
                             curr = nxt;
-                        }, gap);
-                    });
-                    break;
-                case 'flip':
-                    curEl.animate({opacity:0}, dur, function(){
-                        curEl.css({transform:'perspective(400px) rotateY(90deg)'});
-                        setTimeout(function(){
-                            curEl.hide();
-                            nxtEl.css({transform:'perspective(400px) rotateY(-90deg)',opacity:0})
-                                .show()
-                                .animate({opacity:1}, dur, function(){
-                                    nxtEl.css({transform:'perspective(400px) rotateY(0deg)'});
-                                    curr = nxt;
-                                });
-                        }, gap);
-                    });
-                    break;
-                case 'flipVertical':
-                    curEl.animate({opacity:0}, dur, function(){
-                        curEl.css({transform:'perspective(400px) rotateX(90deg)'});
-                        setTimeout(function(){
-                            curEl.hide();
-                            nxtEl.css({transform:'perspective(400px) rotateX(-90deg)',opacity:0})
-                                .show()
-                                .animate({opacity:1}, dur, function(){
-                                    nxtEl.css({transform:'perspective(400px) rotateX(0deg)'});
-                                    curr = nxt;
-                                });
                         }, gap);
                     });
                     break;
