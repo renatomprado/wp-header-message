@@ -8,7 +8,7 @@
 
 - Configuração amigável via painel do Admin.
 - Personalização de estilos (cores, fontes, tamanhos).
-- Seleção de efeitos de transição (Fade, Slide, Zoom, Flip H/V, Typewriter, News Ticker Vertical).
+- Seleção de efeitos de transição (Fade, Slide, Zoom, Typewriter, News Ticker Vertical).
 - Ordenação e linkagem individual de mensagens.
 
 ## 2. Escopo
@@ -38,7 +38,7 @@
   - **Transição:**
     - *Duração* (ms, mínimo 100).
     - *Gap* (ms de espera antes da próxima transição).
-    - *Efeito* (seleção dentre: `fade`, `slide`, `zoom`, `flip`, `flipVertical`, `typewriter`, `newsTicker`).
+    - *Efeito* (seleção dentre: `fade`, `slide`, `zoom`, `typewriter`, `newsTicker`).
 - **Segurança:** usa `wp_nonce_field` e `current_user_can('manage_options')` implicitamente.
 
 ### 3.2. Shortcode Frontend
@@ -65,8 +65,6 @@
 | **Fade**          | `fadeOut` e `fadeIn` jQuery, alternância de opacidade.                          |
 | **Slide**         | `slideUp` e `slideDown` jQuery, alternância vertical suave.                     |
 | **Zoom**          | `fadeOut`, depois `transform: scale()` com transição CSS.                       |
-| **Flip H (flip)** | Rotação 3D no eixo Y, simulando virada horizontal de cartões.                   |
-| **Flip V**        | Rotação 3D no eixo X, simulando virada vertical de cartões.                     |
 | **Typewriter**    | Aparecimento de texto letra-a-letra, baseado em `data-full-text`.               |
 | **News Ticker**   | Scroll contínuo vertical, usando `animate({scrollTop})` jQuery e loop infinito. |
 
